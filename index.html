@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>腾讯自选股 ETF 专区改版原型</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #687386;
+      --line: #e6eaf0;
+      --blue: #2377f5;
+      --blue-soft: #eaf2ff;
+      --red: #d94747;
+      --green: #109868;
+      --gold: #b9822f;
+      --gold-soft: #fff5df;
+      --shadow: 0 8px 22px rgba(27, 45, 78, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #e9edf4 0%, #f7f8fb 52%, #eef2f7 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+    button, input { font: inherit; }
+    button { border: 0; cursor: pointer; background: transparent; color: inherit; }
+    .stage { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .phone {
+      width: min(420px, 100%);
+      height: min(900px, calc(100vh - 48px));
+      min-height: 720px;
+      border: 1px solid #d9dee8;
+      border-radius: 28px;
+      background: var(--bg);
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(24, 35, 56, .22);
+      position: relative;
+    }
+    .screen { height: 100%; overflow-y: auto; padding-bottom: 86px; scroll-behavior: smooth; }
+    .status {
+      height: 36px; padding: 10px 24px 0; display: flex; align-items: center; justify-content: space-between;
+      color: #0f1726; font-size: 14px; font-weight: 700; background: var(--panel);
+    }
+    .status-icons { display: flex; gap: 5px; align-items: center; }
+    .bar { width: 18px; height: 10px; border: 2px solid #0f1726; border-radius: 2px; position: relative; }
+    .bar::after { content: ""; position: absolute; right: -4px; top: 2px; width: 2px; height: 4px; background: #0f1726; border-radius: 1px; }
+    .header { background: var(--panel); padding: 10px 18px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
+    .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .brand-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .logo {
+      width: 32px; height: 32px; border-radius: 7px; background: #fff; border: 1px solid #e1e5eb;
+      display: grid; place-items: center; color: var(--red); font-weight: 900; box-shadow: 0 2px 8px rgba(15, 23, 38, .06);
+    }
+    .brand-title { font-size: 22px; font-weight: 800; white-space: nowrap; }
+    .more { display: flex; gap: 8px; align-items: center; color: #111827; border: 1px solid #edf0f5; border-radius: 18px; padding: 5px 10px; background: #fff; flex: none; }
+    .dot { width: 4px; height: 4px; border-radius: 999px; background: currentColor; display: inline-block; }
+    .search-row { display: flex; gap: 9px; align-items: center; margin-bottom: 12px; }
+    .search {
+      flex: 1; height: 40px; border-radius: 4px; background: #f3f5f9; display: flex; align-items: center;
+      gap: 8px; padding: 0 12px; color: #8a93a3; min-width: 0;
+    }
+    .search-icon { width: 16px; height: 16px; border: 2px solid #9aa3b2; border-radius: 50%; position: relative; flex: none; }
+    .search-icon::after { content: ""; position: absolute; width: 7px; height: 2px; background: #9aa3b2; transform: rotate(45deg); right: -5px; bottom: -2px; border-radius: 2px; }
+    .yuanbao { color: var(--red); font-weight: 700; font-size: 16px; flex: none; }
+    .market-tabs, .chips, .sorts { display: flex; gap: 18px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+    .market-tabs::-webkit-scrollbar, .chips::-webkit-scrollbar, .sorts::-webkit-scrollbar { display: none; }
+    .market-tab { font-size: 18px; color: #3c4455; padding-bottom: 8px; position: relative; white-space: nowrap; flex: none; }
+    .market-tab.active { color: #182237; font-weight: 800; }
+    .market-tab.active::after {
+      content: ""; position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 22px; height: 3px; background: var(--blue); border-radius: 999px;
+    }
+    .hero { background: var(--panel); padding: 18px 18px 0; border-bottom: 1px solid var(--line); }
+    .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-bottom: 12px; }
+    .quick { display: grid; gap: 6px; justify-items: center; color: #202b3e; font-size: 15px; font-weight: 700; }
+    .quick-icon { width: 42px; height: 42px; display: grid; place-items: center; }
+    .quick-icon svg { width: 40px; height: 40px; display: block; }
+    .quick-label { white-space: nowrap; }
+    .guide-row {
+      display: flex; align-items: stretch; gap: 8px; margin: 0 0 12px; max-width: 100%;
+    }
+    .guide-link {
+      min-width: 0; flex: 1; height: 36px; border-radius: 6px; background: #f6f8fc; color: #2d3748;
+      display: inline-flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px;
+      font-size: 14px; border: 1px solid #e8ecf4;
+    }
+    .guide-link strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .guide-link span { color: #8590a1; }
+    .guide-benefits {
+      flex: none; width: 118px; min-height: 36px; border: 1px solid #e8ecf4; border-radius: 6px; background: #fff;
+      display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; overflow: hidden;
+    }
+    .guide-benefit {
+      height: 100%; padding: 4px 2px; display: grid; place-items: center; color: #667085; font-size: 11px;
+      font-weight: 760; line-height: 1.08; text-align: center; border-left: 1px solid #eef1f6;
+    }
+    .guide-benefit:first-child { border-left: 0; }
+    .issue-row {
+      height: 54px; margin: 0 -18px; padding: 0 18px; border-top: 1px solid #f0f2f7; border-bottom: 1px solid #f0f2f7;
+      display: flex; align-items: center; gap: 10px; color: #4d596c; background: #fff; font-size: 14px; text-align: left;
+    }
+    .issue-logo { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+    .issue-badge {
+      height: 21px; padding: 0 4px; background: #e84d59; color: #fff; display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 900; line-height: 1; border-radius: 1px;
+    }
+    .issue-logo em { color: #253044; font-size: 18px; font-weight: 950; font-style: italic; letter-spacing: 0; }
+    .issue-text { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .issue-count { color: var(--blue); font-size: 17px; font-weight: 900; flex: none; }
+    .issue-arrow { color: #9ca5b3; font-size: 22px; line-height: 1; flex: none; }
+    .hero-board {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px -18px 0; padding: 14px 18px 0;
+      border-top: 10px solid var(--bg);
+    }
+    .hero-mini-card {
+      min-width: 0; border: 1px solid #edf0f5; border-radius: 8px; background: #fff; padding: 12px 9px;
+      box-shadow: 0 4px 14px rgba(17, 24, 39, .04); text-align: left; width: 100%;
+    }
+    .hero-mini-card[data-hero-link] { cursor: pointer; }
+    .hero-mini-head { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 5px; min-width: 0; margin-bottom: 9px; }
+    .hero-mini-title { color: #111827; font-size: 18px; font-weight: 950; line-height: 1.08; white-space: nowrap; }
+    .hero-mini-sub {
+      color: #d94747; font-size: 11px; font-weight: 800; background: #fff1f1; border-radius: 3px; padding: 2px 4px;
+      white-space: nowrap; justify-self: start;
+    }
+    .hot-topic-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; margin-bottom: 10px; }
+    .hot-topic-name { color: #253044; font-size: 15px; font-weight: 900; line-height: 1.15; }
+    .hot-topic-change { color: var(--red); font-size: 17px; font-weight: 900; white-space: nowrap; }
+    .t0-rank-list { display: grid; gap: 8px; margin-top: 4px; }
+    .t0-rank-item {
+      display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: 6px;
+      width: 100%; text-align: left; border-radius: 5px;
+    }
+    .fire { color: #ef4444; font-size: 16px; line-height: 1; }
+    .t0-rank-name { min-width: 0; color: #253044; font-size: 14px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .t0-rank-change { color: var(--red); font-size: 16px; font-weight: 900; white-space: nowrap; }
+    section { margin-top: 10px; background: var(--panel); padding: 16px 18px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .title-wrap { min-width: 0; }
+    .section-title { font-size: 22px; font-weight: 900; line-height: 1.1; }
+    .section-sub { color: var(--muted); font-size: 13px; margin-left: 6px; font-weight: 500; }
+    .more-link { color: #9aa4b3; font-weight: 800; flex: none; }
+    .chips { gap: 8px; margin-bottom: 12px; }
+    .chip { height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #dfe5ef; background: #fff; color: #4d596c; white-space: nowrap; flex: none; }
+    .chip.active { border-color: #b9d2ff; background: var(--blue-soft); color: #145ed1; font-weight: 800; }
+    .hot-card, .etf-card, .portfolio-card, .learn-card, .watch-card, .feature-card { border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: var(--shadow); }
+    .hot-card { padding: 14px; }
+    .hot-rank-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .hot-rank {
+      min-width: 0; border: 1px solid transparent; border-radius: 8px; padding: 8px 6px 10px; text-align: center;
+      background: #fff; color: #111827;
+    }
+    .hot-rank.active { border-color: #f0a1a8; background: #fffafa; }
+    .hot-rank-name { font-size: 15px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hot-rank-name .rank-no { color: #d88740; margin-right: 2px; }
+    .hot-rank-change { color: var(--red); font-size: 20px; font-weight: 500; margin-top: 6px; }
+    .hot-rank.active .hot-rank-change::after {
+      content: ""; display: block; width: 22px; height: 4px; border-radius: 999px; background: var(--red); margin: 7px auto 0;
+    }
+    .hot-news { font-size: 18px; line-height: 1.55; color: #1f2937; margin: 6px 0 12px; }
+    .hot-news .tag { vertical-align: 2px; margin-right: 6px; }
+    .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border-radius: 4px; background: #fff0f0; color: var(--red); font-size: 12px; font-weight: 800; margin-right: 7px; }
+    .tag.blue { background: var(--blue-soft); color: var(--blue); }
+    .tag.gold { background: var(--gold-soft); color: var(--gold); }
+    .hot-title { font-size: 18px; font-weight: 900; line-height: 1.35; margin: 2px 0 9px; }
+    .why { display: grid; gap: 8px; margin: 10px 0 12px; }
+    .why-row { display: grid; grid-template-columns: 72px 1fr; gap: 8px; font-size: 13px; line-height: 1.45; color: #4d596c; }
+    .why-label { color: #8a94a4; font-weight: 700; }
+    .related-list { display: grid; gap: 8px; margin-top: 8px; }
+    .mini-etf {
+      border: 1px solid #edf0f5; background: #fafbfe; border-radius: 8px; padding: 10px;
+      display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center;
+    }
+    .feature-card { padding: 14px; }
+    .feature-card[data-module-link] { cursor: pointer; }
+    .index-carousel { overflow: hidden; }
+    .index-viewport { overflow: hidden; width: 100%; touch-action: pan-y; }
+    .index-track { display: flex; transition: transform .32s ease; width: 100%; }
+    .index-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; }
+    .index-slide .feature-line { min-height: 54px; }
+    .index-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+    .index-dot { width: 16px; height: 3px; border-radius: 999px; background: #d7dde8; }
+    .index-dot.active { width: 24px; background: var(--blue); }
+    .feature-divider { height: 1px; background: #eef1f6; margin: 12px 0; }
+    .feature-line { color: #1f2937; font-size: 18px; line-height: 1.45; margin-top: 8px; }
+    .feature-note { color: #697386; font-size: 13px; line-height: 1.45; margin-top: 6px; }
+    .feature-compare {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; align-items: center;
+    }
+    .compare-box { background: #fff3f4; border-radius: 8px; padding: 10px; text-align: center; color: #df3d45; font-weight: 900; }
+    .compare-box.safe { background: #f4f7fb; color: #4c596e; }
+    .compare-label { color: #8a94a4; font-size: 12px; margin-bottom: 3px; }
+    .product-row {
+      display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; margin-top: 10px;
+    }
+    .product-main {
+      min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center;
+      text-align: left; border-radius: 6px; padding: 8px; background: #fafbfe;
+    }
+    .product-main.compact {
+      display: inline-grid; grid-template-columns: minmax(0, 1fr) auto; width: fit-content; max-width: 100%;
+      background: #f6f7fa; padding: 6px 9px;
+    }
+    .product-name { color: #253044; font-size: 17px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-code { color: #8c95a3; font-size: 12px; margin-top: 3px; white-space: nowrap; }
+    .product-price { color: #253044; font-size: 16px; white-space: nowrap; }
+    .product-meta { color: #8c95a3; font-size: 12px; white-space: nowrap; text-align: right; }
+    .product-tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .product-tag { color: #d94747; border: 1px solid #f0bdc2; border-radius: 3px; padding: 1px 4px; font-size: 11px; line-height: 1.35; }
+    .t0-line { color: #253044; font-size: 17px; line-height: 1.45; margin: 8px 0; }
+    .t0-product {
+      display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+      background: #f3f5f9; border-radius: 6px; padding: 8px;
+    }
+    .sparkline { height: 40px; color: #20a05b; display: grid; place-items: center; font-weight: 950; font-size: 24px; }
+    .fav-btn {
+      width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex: none;
+      color: #111827; font-size: 20px; line-height: 1; transform: translateY(-1px);
+    }
+    .fav-btn.active { color: #ef3333; }
+    .fav-btn span { display: block; line-height: 1; }
+    .name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .name-row .name, .name-row .list-name, .name-row .rank-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .name { font-weight: 850; font-size: 15px; }
+    .code { color: #8c95a3; font-size: 12px; margin-top: 2px; }
+    .rise { color: var(--red); font-weight: 900; font-size: 18px; text-align: right; }
+    .fall { color: var(--green); font-weight: 900; font-size: 18px; text-align: right; }
+    .card-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .card-actions.two-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .primary, .secondary, .ghost { height: 36px; border-radius: 6px; padding: 0 12px; font-weight: 800; white-space: nowrap; }
+    .primary { background: var(--blue); color: #fff; flex: 1; }
+    .secondary { background: var(--blue-soft); color: #145ed1; flex: 1; }
+    .ghost { border: 1px solid #dfe5ef; color: #4c596e; background: #fff; }
+    .sorts { gap: 8px; margin-bottom: 12px; }
+    .sort { height: 30px; padding: 0 10px; border: 1px solid #dfe5ef; color: #596579; border-radius: 6px; white-space: nowrap; flex: none; }
+    .sort.active { background: #182237; border-color: #182237; color: #fff; font-weight: 800; }
+    .watch-card { padding: 0; overflow: hidden; border-radius: 14px; box-shadow: none; }
+    .watch-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 14px 10px;
+    }
+    .watch-title { font-size: 22px; font-weight: 950; color: #121826; white-space: nowrap; }
+    .breadth { min-width: 144px; }
+    .breadth-text { display: flex; justify-content: flex-end; align-items: baseline; gap: 9px; font-size: 20px; font-weight: 950; }
+    .up-count { color: var(--red); }
+    .down-count { color: #55a575; }
+    .colon { color: #6f7685; }
+    .breadth-bar { display: grid; grid-template-columns: 5fr 1fr; gap: 4px; margin-top: 6px; height: 8px; }
+    .breadth-bar span { border-radius: 999px; }
+    .breadth-bar .up { background: var(--red); }
+    .breadth-bar .down { background: #55a575; }
+    .watch-filter {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 14px 0;
+      border-bottom: 1px solid #edf0f5; position: relative;
+    }
+    .watch-tabs { display: flex; align-items: center; gap: 24px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+    .watch-tabs::-webkit-scrollbar { display: none; }
+    .watch-tab {
+      height: 52px; color: #141b2a; font-size: 18px; font-weight: 850; position: relative; flex: none;
+    }
+    .watch-tab.active::after {
+      content: ""; position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 28px; height: 3px;
+      border-radius: 999px; background: var(--red);
+    }
+    .view-switch {
+      display: flex; align-items: center; gap: 0; flex: none; height: 32px; border: 1px solid #e2e6ee;
+      border-radius: 6px; overflow: hidden; background: #f6f8fb;
+    }
+    .view-option {
+      min-width: 52px; height: 30px; padding: 0 9px; color: #8c93a1; font-size: 14px; font-weight: 760;
+    }
+    .view-option.active { background: #fff; color: var(--red); }
+    .heatmap {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; padding: 14px 14px 12px;
+      background: #fff;
+    }
+    .heat-tile {
+      min-height: 82px; border-radius: 2px; background: #df4b48; color: #fff; padding: 9px 8px;
+      display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
+    }
+    .heat-tile.large { grid-column: span 2; min-height: 96px; }
+    .heat-tile.down { background: #4da776; }
+    .heat-name { font-size: 14px; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .heat-tile.large .heat-name { font-size: 18px; }
+    .heat-main { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; }
+    .heat-change { font-size: 20px; font-weight: 950; line-height: 1; white-space: nowrap; }
+    .heat-tile.large .heat-change { font-size: 24px; }
+    .heat-volume { font-size: 12px; font-weight: 800; white-space: nowrap; opacity: .96; }
+    .heat-hold {
+      align-self: flex-start; margin-top: 6px; max-width: 100%; height: 24px; border-radius: 4px; padding: 0 7px;
+      background: #f5d9b0; color: #7c4d14; display: inline-flex; align-items: center; font-size: 13px; font-weight: 850;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .watch-more {
+      height: 48px; border-top: 1px solid #edf0f5; color: #b1b5bd; display: flex; align-items: center;
+      justify-content: center; gap: 8px; font-size: 16px; font-weight: 800; text-decoration: none;
+    }
+    .watch-list-panel { display: grid; background: #fff; padding: 8px 14px 8px; }
+    .list-row {
+      min-height: 64px; display: grid; grid-template-columns: 28px 26px 1fr auto; gap: 8px; align-items: center;
+      border-bottom: 1px solid #edf0f5;
+    }
+    .list-row:last-child { border-bottom: 0; }
+    .list-rank { color: #9aa3b2; font-size: 16px; font-weight: 900; text-align: left; }
+    .list-rank.top { color: var(--red); }
+    .list-name { color: #172033; font-size: 16px; font-weight: 850; }
+    .list-meta { color: #8c95a3; font-size: 12px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; }
+    .list-right { text-align: right; }
+    .list-change { color: var(--red); font-size: 18px; font-weight: 950; }
+    .list-volume { color: #8c95a3; font-size: 12px; margin-top: 4px; }
+    a.primary { text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .jump-card { display: grid; gap: 12px; }
+    .jump-text { color: #5d6878; font-size: 14px; line-height: 1.55; }
+    .jump-link { color: #8a94a4; font-size: 12px; line-height: 1.4; word-break: break-all; background: #f6f8fb; border-radius: 6px; padding: 10px; }
+    .rank-page {
+      position: absolute; inset: 0; z-index: 45; background: var(--bg); display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform .24s ease; box-shadow: -18px 0 42px rgba(17, 24, 39, .18);
+    }
+    .rank-page.show { transform: translateX(0); }
+    .rank-header { background: #fff; border-bottom: 1px solid var(--line); padding: 10px 18px 0; }
+    .rank-top { height: 40px; display: grid; grid-template-columns: 36px 1fr 36px; align-items: center; }
+    .back {
+      width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #1b2435;
+      font-size: 28px; line-height: 1; background: #f4f6fa;
+    }
+    .rank-title { text-align: center; font-size: 18px; font-weight: 900; }
+    .rank-tabs { display: flex; gap: 24px; overflow-x: auto; scrollbar-width: none; padding-top: 8px; }
+    .rank-tabs::-webkit-scrollbar { display: none; }
+    .rank-tab { height: 44px; color: #30394a; font-size: 17px; font-weight: 820; position: relative; white-space: nowrap; flex: none; }
+    .rank-tab.active { color: #111827; }
+    .rank-tab.active::after {
+      content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 28px; height: 3px;
+      border-radius: 999px; background: var(--blue);
+    }
+    .rank-body { flex: 1; overflow-y: auto; padding: 12px 14px 22px; }
+    .rank-summary {
+      background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .rank-summary-title { font-size: 16px; font-weight: 900; }
+    .rank-summary-sub { color: #7c8797; font-size: 12px; margin-top: 3px; }
+    .rank-breadth { text-align: right; font-weight: 950; white-space: nowrap; }
+    .rank-breadth .up-count, .rank-breadth .down-count { font-size: 18px; }
+    .rank-sorts { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
+    .rank-sorts::-webkit-scrollbar { display: none; }
+    .rank-sort {
+      height: 32px; padding: 0 11px; border-radius: 6px; border: 1px solid #dfe5ef; background: #fff;
+      color: #586377; font-size: 13px; font-weight: 760; white-space: nowrap; flex: none;
+    }
+    .rank-sort.active { background: #182237; border-color: #182237; color: #fff; }
+    .rank-list { display: grid; gap: 8px; }
+    .rank-item {
+      background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 11px 10px;
+      display: grid; grid-template-columns: 28px 26px 1fr auto; gap: 8px; align-items: center;
+    }
+    .rank-no { color: #9ba4b2; font-size: 17px; font-weight: 950; }
+    .rank-no.top { color: var(--red); }
+    .rank-name { color: #182237; font-size: 16px; font-weight: 900; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-code { color: #8c95a3; font-size: 12px; margin-top: 3px; white-space: nowrap; }
+    .rank-right { text-align: right; }
+    .rank-change { color: var(--red); font-size: 18px; font-weight: 950; }
+    .rank-change.down { color: var(--green); }
+    .rank-extra { color: #8c95a3; font-size: 12px; margin-top: 3px; white-space: nowrap; }
+    .etf-list { display: grid; gap: 10px; }
+    .etf-card { padding: 12px; }
+    .etf-top { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+    .etf-desc { color: var(--muted); font-size: 12px; margin-top: 5px; line-height: 1.4; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+    .metric { background: #f6f8fb; border-radius: 6px; padding: 8px 6px; min-width: 0; }
+    .metric-label { color: #8b95a5; font-size: 11px; white-space: nowrap; }
+    .metric-value { font-size: 13px; font-weight: 850; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .compare-stick {
+      position: sticky; bottom: 78px; z-index: 15; margin: 10px 18px -4px; border-radius: 8px;
+      background: #182237; color: #fff; padding: 11px 12px; display: none; align-items: center; justify-content: space-between; gap: 10px;
+      box-shadow: 0 12px 24px rgba(18, 31, 55, .24);
+    }
+    .compare-stick.show { display: flex; }
+    .compare-stick button { background: #fff; color: #182237; height: 30px; border-radius: 6px; padding: 0 10px; font-weight: 800; }
+    .compare-stick span { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .compare-stick .exit { background: transparent; color: #d7deea; border: 1px solid rgba(255,255,255,.35); }
+    .portfolio-card { padding: 13px; display: grid; gap: 12px; }
+    .portfolio-score { display: grid; grid-template-columns: 86px 1fr; gap: 12px; align-items: center; }
+    .score-ring { width: 78px; height: 78px; border-radius: 50%; background: conic-gradient(var(--red) 0 72%, #f3dfe2 72% 100%); display: grid; place-items: center; position: relative; }
+    .score-ring::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: #fff; }
+    .score-ring span { position: relative; font-weight: 950; color: var(--red); font-size: 20px; }
+    .portfolio-title { font-weight: 900; font-size: 17px; margin-bottom: 5px; }
+    .portfolio-text { color: #5d6878; font-size: 13px; line-height: 1.45; }
+    .alert-box { background: #fff7e8; border: 1px solid #f1d7aa; border-radius: 8px; padding: 10px; color: #6d4c19; font-size: 13px; line-height: 1.45; }
+    .learn-card { padding: 13px; display: grid; grid-template-columns: 1fr 96px; gap: 12px; align-items: center; }
+    .thumb {
+      height: 70px; border-radius: 8px; background: linear-gradient(135deg, #172033, #2377f5 58%, #f3c772);
+      display: grid; place-items: center; color: #fff; font-weight: 900;
+    }
+    .risk-note { color: #8a94a4; font-size: 12px; line-height: 1.55; padding: 0 18px 20px; }
+    .bottom-nav {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 70px; background: rgba(255, 255, 255, .96);
+      border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(5, 1fr); z-index: 30;
+    }
+    .nav-item { display: grid; place-items: center; gap: 2px; color: #343d4f; font-size: 12px; padding-top: 6px; }
+    .nav-icon { width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 5px; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+    .nav-item.active { color: var(--blue); font-weight: 800; }
+    .sheet-backdrop { position: absolute; inset: 0; background: rgba(16, 24, 40, .46); z-index: 40; display: none; }
+    .sheet-backdrop.show { display: block; }
+    .sheet {
+      position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 14px 14px 0 0;
+      padding: 16px 18px 20px; max-height: 78%; overflow-y: auto; box-shadow: 0 -18px 50px rgba(17, 24, 39, .22);
+    }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .sheet-title { font-size: 20px; font-weight: 950; }
+    .close { width: 34px; height: 34px; border-radius: 50%; background: #f1f4f8; display: grid; place-items: center; color: #667085; font-size: 22px; line-height: 1; }
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .compare-table th, .compare-table td { padding: 10px 8px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
+    .compare-table th { color: #7b8596; font-weight: 750; white-space: nowrap; }
+    .chat { display: grid; gap: 10px; }
+    .bubble { padding: 11px 12px; border-radius: 8px; line-height: 1.5; font-size: 14px; }
+    .bubble.user { background: var(--blue); color: #fff; margin-left: 50px; }
+    .bubble.bot { background: #f4f6fa; color: #253044; margin-right: 22px; }
+    .prompt-grid { display: grid; gap: 8px; margin-top: 12px; }
+    .prompt { text-align: left; border: 1px solid #dfe5ef; border-radius: 8px; padding: 10px; color: #334155; background: #fff; }
+    .demo-message { color: #4d596c; font-size: 15px; line-height: 1.6; margin: 4px 0 16px; }
+    @media (max-width: 460px) {
+      .stage { padding: 0; }
+      .phone { width: 100vw; height: 100vh; min-height: 100vh; border: 0; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="phone" aria-label="腾讯自选股 ETF 专区改版原型">
+      <div class="screen" id="screen">
+        <div class="status"><span>12:06</span><span class="status-icons"><span>5G</span><span class="bar"></span></span></div>
+        <header class="header">
+          <div class="brand">
+            <div class="brand-left"><div class="logo">↗</div><div class="brand-title">腾讯自选股</div></div>
+            <div class="more" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          </div>
+          <div class="search-row">
+            <button class="search" id="searchAsk"><span class="search-icon"></span><span>搜索 ETF，投资问题有答案</span></button>
+            <button class="yuanbao" id="headerAsk">问元宝</button>
+          </div>
+          <nav class="market-tabs" aria-label="行情分类">
+            <button class="market-tab">A股</button><button class="market-tab">板块</button><button class="market-tab active">ETF</button>
+            <button class="market-tab">可转债</button><button class="market-tab">创业板</button><button class="market-tab">科创板</button>
+          </nav>
+        </header>
+        <div class="hero">
+          <div class="quick-grid">
+            <button class="quick" data-action="original-page">
+              <span class="quick-icon" aria-hidden="true">
+                <svg viewBox="0 0 44 44" fill="none">
+                  <path d="M12 8h20v25H12z" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+                  <path d="M18 18h10M18 24h7" stroke="#2377f5" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M32 27c3 2 5 5 5 8a6 6 0 0 1-12 0c0-3 4-6 7-8Z" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="quick-label">热门ETF</span>
+            </button>
+            <button class="quick" data-action="original-page">
+              <span class="quick-icon" aria-hidden="true">
+                <svg viewBox="0 0 44 44" fill="none">
+                  <path d="M13 8h20v28l-10-6-10 6V8Z" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+                  <path d="M19 18h11M26 14l5 4-5 4" stroke="#2377f5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="quick-label">主力净流入</span>
+            </button>
+            <button class="quick" data-action="original-page">
+              <span class="quick-icon" aria-hidden="true">
+                <svg viewBox="0 0 44 44" fill="none">
+                  <path d="M10 25c1-8 8-14 17-13 7 1 12 6 13 13" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M5 27c8 5 23 5 34-1" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+                  <text x="27" y="34" fill="#2377f5" font-size="9" font-weight="900">ETF</text>
+                </svg>
+              </span>
+              <span class="quick-label">投资全球</span>
+            </button>
+            <button class="quick" data-action="buy-index-entry">
+              <span class="quick-icon" aria-hidden="true">
+                <svg viewBox="0 0 44 44" fill="none">
+                  <circle cx="22" cy="22" r="16" stroke="#111827" stroke-width="3"/>
+                  <text x="22" y="26" text-anchor="middle" fill="#2377f5" font-size="11" font-weight="900">500</text>
+                </svg>
+              </span>
+              <span class="quick-label">一键买龙头</span>
+            </button>
+          </div>
+          <div class="guide-row">
+            <button class="guide-link" data-action="guide-page">
+              <strong>新手指南：一分钟了解场内ETF</strong>
+              <span>›</span>
+            </button>
+            <div class="guide-benefits" aria-label="ETF 特点">
+              <div class="guide-benefit">组合<br>持仓</div>
+              <div class="guide-benefit">部分<br>T+0</div>
+              <div class="guide-benefit">免<br>印花税</div>
+            </div>
+          </div>
+          <button class="issue-row" data-action="original-page">
+            <span class="issue-logo"><span class="issue-badge">新发</span><em>ETF</em></span>
+            <span class="issue-text">正在发售（国证价值100ETF招商）</span>
+            <span class="issue-count">19支</span>
+            <span class="issue-arrow">›</span>
+          </button>
+          <div class="hero-board" id="heroBoard"></div>
+        </div>
+        <section id="watch">
+          <div class="section-head" data-watch-link><div class="title-wrap"><span class="section-title">看盘面</span><span class="section-sub">把握市场行情</span></div><button class="more-link" data-action="open-rank">›</button></div>
+          <div class="watch-card">
+            <div class="watch-head">
+              <div class="watch-title">今日概况</div>
+              <div class="breadth">
+                <div class="breadth-text"><span class="up-count">涨 1291</span><span class="colon">:</span><span class="down-count">跌 241</span></div>
+                <div class="breadth-bar"><span class="up"></span><span class="down"></span></div>
+              </div>
+            </div>
+            <div class="watch-filter">
+              <div class="watch-tabs" id="watchTabs"></div>
+              <div class="view-switch" aria-label="今日概况展示方式">
+                <button class="view-option active" data-view="heatmap">热力图</button>
+                <button class="view-option" data-view="list">列表</button>
+              </div>
+            </div>
+            <div id="watchContent"></div>
+            <button class="watch-more" data-action="open-rank">查看更多 <span>›</span></button>
+          </div>
+        </section>
+        <div id="featureModules"></div>
+        <section id="portfolio">
+          <div class="section-head"><div class="title-wrap"><span class="section-title">我的 ETF</span><span class="section-sub">诊断持仓情况</span></div><button class="more-link" data-scroll="buy-index">›</button></div>
+          <div class="portfolio-card">
+            <div class="portfolio-score">
+              <div class="score-ring"><span>+5%</span></div>
+              <div><div class="portfolio-title">组合集中在科技与港股互联网</div><div class="portfolio-text">近 7 日收益主要来自港股互联网 ETF；汽车主题与消费主题相关性偏高。</div></div>
+            </div>
+            <div class="alert-box">当前持仓中 3 只 ETF 偏成长风格，波动可能较大。可加入宽基、红利 ETF 优化资产配置。</div>
+            <div class="card-actions"><button class="secondary" data-scroll="buy-index">优化配置</button></div>
+          </div>
+        </section>
+        <section id="learn">
+          <div class="section-head"><div class="title-wrap"><span class="section-title">ETF 轻松学</span><span class="section-sub">从概念到交易规则</span></div><button class="more-link">›</button></div>
+          <div class="learn-card"><div><div class="name">哪些 ETF 可以实现 T+0 交易？</div><div class="etf-desc">覆盖跨境、商品、债券等常见类型，结合案例说明交易风险。</div></div><div class="thumb">ETF 学习</div></div>
+        </section>
+        <p class="risk-note">示例数据仅用于交互原型演示，不构成投资建议和收益保证。基金有风险，投资需谨慎。</p>
+      </div>
+      <nav class="bottom-nav" aria-label="底部导航">
+        <button class="nav-item"><span class="nav-icon">新</span><span>新闻</span></button>
+        <button class="nav-item"><span class="nav-icon">自</span><span>自选</span></button>
+        <button class="nav-item active"><span class="nav-icon">行</span><span>行情</span></button>
+        <button class="nav-item"><span class="nav-icon">开</span><span>开户</span></button>
+        <button class="nav-item"><span class="nav-icon">我</span><span>我的</span></button>
+      </nav>
+      <div class="sheet-backdrop" id="compareSheet"><div class="sheet"><div class="sheet-head"><div class="sheet-title">ETF 对比</div><button class="close" data-close="compareSheet">×</button></div><div id="compareContent"></div></div></div>
+      <div class="sheet-backdrop" id="assistantSheet">
+        <div class="sheet">
+          <div class="sheet-head"><div class="sheet-title">问元宝</div><button class="close" data-close="assistantSheet">×</button></div>
+          <div class="chat" id="chat"></div>
+          <div class="prompt-grid">
+            <button class="prompt" data-prompt="为什么今天汽车 ETF 比较强？">为什么今天汽车 ETF 比较强？</button>
+            <button class="prompt" data-prompt="同类 ETF 应该怎么选？">同类 ETF 应该怎么选？</button>
+            <button class="prompt" data-prompt="T+0 ETF 有哪些风险？">T+0 ETF 有哪些风险？</button>
+            <button class="prompt" data-prompt="我的 ETF 持仓有什么风险？">我的 ETF 持仓有什么风险？</button>
+          </div>
+        </div>
+      </div>
+      <div class="sheet-backdrop" id="demoSheet">
+        <div class="sheet">
+          <div class="sheet-head"><div class="sheet-title" id="demoTitle">页面跳转</div><button class="close" data-close="demoSheet">×</button></div>
+          <div class="demo-message" id="demoMessage">本次 demo 无优化，跳转原二级页面。</div>
+          <button class="primary" data-close="demoSheet" style="width: 100%;">知道了</button>
+        </div>
+      </div>
+      <div class="rank-page" id="rankPage">
+        <div class="rank-header">
+          <div class="rank-top">
+            <button class="back" data-action="close-rank">‹</button>
+            <div class="rank-title">ETF 排行榜</div>
+            <div></div>
+          </div>
+          <div class="rank-tabs" id="rankTabs"></div>
+        </div>
+        <div class="rank-body">
+          <div class="rank-summary">
+            <div>
+              <div class="rank-summary-title">盘中热点 ETF</div>
+              <div class="rank-summary-sub">按行情表现快速查看全市场机会</div>
+            </div>
+            <div class="rank-breadth"><span class="up-count">涨 1291</span><span class="colon"> : </span><span class="down-count">跌 241</span></div>
+          </div>
+          <div class="rank-sorts" id="rankSorts"></div>
+          <div class="rank-list" id="rankList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    const hotSpots = [
+      { id: "auto", label: "汽车链", title: "东风与华为合作车型量产，汽车产业链走强", why: "整车智能化、零部件和智能座舱方向交易活跃，主题 ETF 更容易承接分散投资需求。", risk: "主题短期涨幅较快，需关注追高风险和单一行业波动。", etfs: ["516840", "159928", "510630"] },
+      { id: "global", label: "投资全球", title: "油价预期升温，跨境与商品 ETF 关注度提升", why: "海外市场与商品资产可提供不同风险暴露，适合用于观察 A 股之外的机会。", risk: "跨境 ETF 需关注汇率、溢价率和交易时段差异。", etfs: ["513350", "513100", "518880"] },
+      { id: "dividend", label: "红利", title: "高股息资产受关注，红利 ETF 防守属性强化", why: "市场波动时，红利资产常被用于降低组合波动，适合与成长主题做搭配。", risk: "红利策略不等于低风险，行业集中和股息可持续性需要持续跟踪。", etfs: ["562060", "510880", "515180"] }
+    ];
+    const etfs = [
+      { code: "516840", name: "汽车ETF南方", category: "行业主题", index: "中证汽车指数", change: 2.78, price: "0.814", scale: "36亿", volume: "4.8亿", fee: "0.50%", premium: "0.18%", t0: "否", desc: "汽车整车、零部件与智能化链条。" },
+      { code: "159928", name: "消费ETF汇添富", category: "行业主题", index: "中证主要消费", change: 2.80, price: "0.698", scale: "72亿", volume: "3.1亿", fee: "0.50%", premium: "0.06%", t0: "否", desc: "食品饮料、白酒和消费龙头。" },
+      { code: "512690", name: "酒ETF鹏华", category: "行业主题", index: "中证酒", change: 3.90, price: "0.453", scale: "118亿", volume: "8.7亿", fee: "0.50%", premium: "0.10%", t0: "否", desc: "白酒与酒类产业链主题。" },
+      { code: "510210", name: "上证指数ETF富国", category: "宽基指数", index: "上证指数", change: -0.72, price: "96.30", scale: "64亿", volume: "2.2亿", fee: "0.15%", premium: "-0.03%", t0: "否", desc: "A 股经典晴雨表，覆盖沪市核心资产。" },
+      { code: "159500", name: "中证500ETF富国", category: "宽基指数", index: "中证500", change: 2.09, price: "112.30", scale: "88亿", volume: "6.8亿", fee: "0.15%", premium: "0.04%", t0: "否", desc: "聚焦 A 股中盘成长，中小市值弹性更高。" },
+      { code: "510300", name: "沪深300ETF华泰柏瑞", category: "宽基指数", index: "沪深300", change: -0.36, price: "3.86", scale: "1700亿", volume: "42亿", fee: "0.15%", premium: "0.01%", t0: "否", desc: "A 股大盘核心宽基，适合做基础仓位。" },
+      { code: "513100", name: "纳指ETF国泰", category: "跨境投资", index: "纳斯达克100", change: 1.32, price: "1.48", scale: "236亿", volume: "11亿", fee: "0.60%", premium: "0.72%", t0: "是", desc: "美股科技龙头暴露，需关注溢价和汇率。" },
+      { code: "513350", name: "标普油气ETF富国", category: "跨境投资", index: "标普油气精选", change: 1.74, price: "123.10", scale: "21亿", volume: "1.9亿", fee: "0.60%", premium: "0.45%", t0: "是", desc: "能源板块海外暴露，波动较高。" },
+      { code: "518880", name: "黄金ETF华安", category: "商品债券", index: "黄金现货合约", change: 0.42, price: "5.48", scale: "286亿", volume: "9.2亿", fee: "0.50%", premium: "0.02%", t0: "是", desc: "黄金资产工具，可用于风险分散。" },
+      { code: "511260", name: "十年国债ETF", category: "商品债券", index: "10年国债", change: 0.08, price: "113.44", scale: "58亿", volume: "0.7亿", fee: "0.20%", premium: "0.00%", t0: "是", desc: "利率债工具，偏稳健配置。" },
+      { code: "562060", name: "标普A股红利ETF", category: "宽基指数", index: "标普A股红利", change: 10.18, price: "62.80", scale: "42亿", volume: "2.6亿", fee: "0.50%", premium: "0.08%", t0: "否", desc: "聚焦高股息资产，偏防守配置。" },
+      { code: "510880", name: "红利ETF华泰柏瑞", category: "宽基指数", index: "上证红利", change: 0.86, price: "3.12", scale: "188亿", volume: "5.4亿", fee: "0.50%", premium: "0.02%", t0: "否", desc: "跟踪上证红利指数，高股息风格。" },
+      { code: "515180", name: "中证红利ETF", category: "宽基指数", index: "中证红利", change: 0.72, price: "1.36", scale: "95亿", volume: "3.8亿", fee: "0.50%", premium: "0.03%", t0: "否", desc: "覆盖沪深高股息公司。" },
+      { code: "513330", name: "港股互联网ETF国泰", category: "跨境投资", index: "中证港股通互联网", change: 0.43, price: "0.91", scale: "163亿", volume: "12亿", fee: "0.60%", premium: "0.18%", t0: "是", desc: "港股互联网龙头，支持 T+0 交易。" }
+      ,{ code: "159725", name: "在线消费ETF南方", category: "行业主题", index: "中证线上消费", change: 7.12, price: "0.82", scale: "42亿", volume: "2.03亿", fee: "0.50%", premium: "0.08%", t0: "否", desc: "覆盖线上消费、平台经济和消费科技。" }
+      ,{ code: "159586", name: "工业软件ETF广发", category: "行业主题", index: "中证工业软件", change: 7.23, price: "1.06", scale: "31亿", volume: "4969万", fee: "0.50%", premium: "0.11%", t0: "否", desc: "聚焦工业软件、智能制造和AI应用。" }
+      ,{ code: "159890", name: "云计算ETF广发", category: "行业主题", index: "中证云计算", change: 9.86, price: "1.21", scale: "24亿", volume: "4015万", fee: "0.50%", premium: "0.09%", t0: "否", desc: "覆盖云计算、AI算力和软件服务。" }
+    ];
+    const categories = ["全部", "宽基指数", "行业主题", "跨境投资", "商品债券"];
+    const sorts = [{ key: "change", label: "涨幅" }, { key: "volume", label: "成交额" }, { key: "fee", label: "费率" }, { key: "premium", label: "溢价率" }];
+    const watchTabs = ["全部", "自选", "宽基", "主题", "全球"];
+    const featureModules = [
+      {
+        id: "buy-index",
+        title: "买指数",
+        sub: "布局核心指数",
+        tag: "产品亮点",
+        headline: "A股经典晴雨表，映射市场情绪与趋势",
+        text: "上证指数过去20年涨1.3倍，年化4%",
+        etf: "510210",
+        layout: "index"
+      },
+      {
+        id: "global-invest",
+        title: "投全球",
+        sub: "捕捉全球机会",
+        tag: "热点",
+        headline: "美原油库存减580万桶:供给收紧预期升温，能源板块迎机会",
+        etf: "513350",
+        layout: "global"
+      },
+      {
+        id: "dividend",
+        title: "享红利",
+        sub: "坐享分红收益",
+        headline: "",
+        etf: "562060",
+        layout: "dividend"
+      }
+    ];
+    const heatmapItems = [
+      { code: "159890", name: "云计算ETF广发", tab: "主题", change: 9.86, volume: "4015万", flow: 8210, scaleNum: 24, hold: "重仓｜科大讯飞 +5.89%" },
+      { code: "159725", name: "线上消费ETF", tab: "主题", change: 9.47, volume: "2.03亿", flow: 7640, scaleNum: 42, hold: "重仓｜科大讯飞 +5.72%" },
+      { code: "159899", name: "创业板软件ETF", tab: "主题", change: 9.45, volume: "1.67亿", flow: 5310, scaleNum: 18 },
+      { code: "159899", name: "创业板软件ETF", tab: "自选", change: 8.95, volume: "1.51亿", flow: 4980, scaleNum: 16 },
+      { code: "159363", name: "创业板人工智能", tab: "主题", change: 8.31, volume: "1.65亿", flow: 4860, scaleNum: 35 },
+      { code: "159363", name: "创业板人工智能", tab: "自选", change: 8.18, volume: "6127万", flow: 4380, scaleNum: 21 },
+      { code: "159819", name: "创业板人工智能", tab: "主题", change: 8.17, volume: "8860万", flow: 4240, scaleNum: 28 },
+      { code: "159586", name: "计算机ETF南方", tab: "主题", change: 8.06, volume: "4969万", flow: 3920, scaleNum: 31 },
+      { code: "159381", name: "创业板人工智能", tab: "主题", change: 7.86, volume: "1.42亿", flow: 3760, scaleNum: 26 },
+      { code: "510300", name: "沪深300ETF", tab: "宽基", change: 1.26, volume: "42.0亿", flow: 11200, scaleNum: 1700 },
+      { code: "510210", name: "上证指数ETF", tab: "宽基", change: -0.72, volume: "2.2亿", flow: -1860, scaleNum: 64 },
+      { code: "513100", name: "纳指ETF", tab: "全球", change: 1.32, volume: "11.0亿", flow: 3120, scaleNum: 236 },
+      { code: "513350", name: "标普油气ETF", tab: "全球", change: 1.74, volume: "1.9亿", flow: 1360, scaleNum: 21 }
+    ];
+    const rankSorts = ["涨幅", "成交额", "主力净流入", "基金规模"];
+    const digHotTopics = [
+      { id: "token", rank: 1, label: "词元概念", change: 11.45, headline: "7月24日，国家数据局将AI大模型计量单位“Token”中文名定为“词元”。", etf: "159725" },
+      { id: "physical-ai", rank: 2, label: "物理AI", change: 9.26, headline: "7月31日，华大智造旗下涌生智能发布全球首份物理AI实验室答卷。", etf: "159586" },
+      { id: "google", rank: 3, label: "谷歌概念", change: 8.86, headline: "谷歌AI与云业务表现活跃，带动云计算、软件服务等相关主题升温。", etf: "159890" }
+    ];
+    const t0RankItems = [
+      { name: "中韩半导体ETF", change: 6.93 },
+      { name: "亚太精选ETF", change: 5.63 },
+      { name: "教育ETF博时", change: 4.75 }
+    ];
+    const indexSlides = [
+      { headline: "A股经典晴雨表，映射市场情绪与趋势", text: "上证指数过去20年涨1.3倍，年化4%", etf: "510210" },
+      { headline: "聚焦A股中盘成长，中小市值挖掘高弹性", text: "中证500过去20年涨4.3倍，年化约9%", etf: "159500" }
+    ];
+    let currentHot = "auto";
+    let currentDigHot = "token";
+    let currentCategory = "全部";
+    let currentSort = "change";
+    let currentWatchTab = "全部";
+    let currentWatchView = "heatmap";
+    let currentRankTab = "全部";
+    let currentRankSort = "涨幅";
+    let currentIndexSlide = 0;
+    let indexTimer = null;
+    let indexTouch = null;
+    const compare = new Set(["516840", "159928"]);
+    const favorites = new Set(["516840"]);
+    const $ = (id) => document.getElementById(id);
+    function getEtf(code) { return etfs.find((item) => item.code === code); }
+    function favButton(code) { return `<button class="fav-btn ${favorites.has(code) ? "active" : ""}" data-fav="${code}" aria-label="${favorites.has(code) ? "取消自选" : "加自选"}"><span>${favorites.has(code) ? "♥" : "♡"}</span></button>`; }
+    function parseNumber(value) { return Number(String(value).replace(/[^0-9.-]/g, "")) || 0; }
+    function formatChange(value) { const cls = value >= 0 ? "rise" : "fall"; const sign = value >= 0 ? "+" : ""; return `<div class="${cls}">${sign}${value.toFixed(2)}%</div>`; }
+    function productRow(etf, options = {}) {
+      const sign = etf.change >= 0 ? "+" : "";
+      const mainClass = options.compact ? "product-main compact" : "product-main";
+      return `<div class="product-row">
+        ${favButton(etf.code)}
+        <button class="${mainClass}" data-product="${etf.code}">
+          <div>
+            <div class="product-name">${etf.name}</div>
+            <div class="product-code">${etf.code}${options.tags ? `<span class="product-tags">${options.tags.map((tag) => `<span class="product-tag">${tag}</span>`).join("")}</span>` : ""}</div>
+          </div>
+          <div class="${etf.change >= 0 ? "rise" : "fall"}">${sign}${etf.change.toFixed(2)}%</div>
+          ${options.compact ? "" : `<div><div class="product-price">${etf.price}元</div><div class="product-meta">${options.metric || "买一笔仅需"}</div></div>`}
+        </button>
+      </div>`;
+    }
+    function renderHeroBoard() {
+      const topic = digHotTopics[0];
+      const topicEtf = getEtf(topic.etf);
+      $("heroBoard").innerHTML = `<div class="hero-mini-card" data-hero-link="dig-hot">
+        <div class="hero-mini-head"><div class="hero-mini-title">挖热点</div><div class="hero-mini-sub">紧跟实时热点</div></div>
+        <div class="hot-topic-row"><div class="hot-topic-name">${topic.label}</div><div class="hot-topic-change">+${topic.change.toFixed(2)}%</div></div>
+        ${topicEtf ? `<button class="t0-rank-item" data-action="etf-detail"><div class="fire">🔥</div><div class="t0-rank-name">${topicEtf.name}</div><div class="t0-rank-change">+${topicEtf.change.toFixed(2)}%</div></button>` : ""}
+      </div>
+      <div class="hero-mini-card" data-hero-link="t0">
+        <div class="hero-mini-head"><div class="hero-mini-title">T+0交易</div><div class="hero-mini-sub">支持日内交易</div></div>
+        <div class="t0-rank-list">
+          ${t0RankItems.map((item) => `<button class="t0-rank-item" data-action="etf-detail"><div class="fire">🔥</div><div class="t0-rank-name">${item.name}</div><div class="t0-rank-change">+${item.change.toFixed(2)}%</div></button>`).join("")}
+        </div>
+      </div>`;
+    }
+    function renderFeatureCard(module, etf) {
+      if (module.layout === "index") {
+        return `<div class="feature-card index-carousel">
+          <div class="index-viewport" data-index-carousel>
+            <div class="index-track" style="transform: translateX(-${currentIndexSlide * 100}%);">
+              ${indexSlides.map((slide) => {
+                const slideEtf = getEtf(slide.etf);
+                return `<div class="index-slide" data-module-link="buy-index">
+                  <div class="feature-line" style="margin-top:0;"><span class="tag">产品亮点</span>${slide.headline}</div>
+                  <div class="feature-note"><span class="tag">历史收益</span>${slide.text}</div>
+                  <div class="feature-divider"></div>
+                  ${slideEtf ? productRow(slideEtf, { metric: "买一笔仅需" }) : ""}
+                </div>`;
+              }).join("")}
+            </div>
+          </div>
+          <div class="index-dots">
+            ${indexSlides.map((_, index) => `<button class="index-dot ${index === currentIndexSlide ? "active" : ""}" data-index-slide="${index}" aria-label="切换到第 ${index + 1} 张"></button>`).join("")}
+          </div>
+        </div>`;
+      }
+      if (module.layout === "hot") {
+        const topic = digHotTopics.find((item) => item.id === currentDigHot) || digHotTopics[0];
+        const topicEtf = getEtf(topic.etf) || etf;
+        return `<div class="feature-card" data-module-link>
+          <div class="hot-rank-tabs">
+            ${digHotTopics.map((item) => `<button class="hot-rank ${item.id === currentDigHot ? "active" : ""}" data-feature-hot="${item.id}">
+              <div class="hot-rank-name"><span class="rank-no">〈${item.rank}〉</span>${item.label}</div>
+              <div class="hot-rank-change">+${item.change.toFixed(2)}%</div>
+            </button>`).join("")}
+          </div>
+          <div class="hot-news"><span class="tag">热点</span>${topic.headline}</div>
+          ${productRow(topicEtf, { compact: true })}
+        </div>`;
+      }
+      if (module.layout === "dividend") {
+        return `<div class="feature-card" data-module-link>
+          <div class="feature-compare">
+            <div class="compare-box"><div class="compare-label">股息率</div><div>4.00%+</div><div style="font-size:13px;color:#253044;">红利ETF</div></div>
+            <div class="compare-box safe"><div class="compare-label">1年期利率</div><div>1.00%+</div><div style="font-size:13px;">银行存款</div></div>
+          </div>
+          ${productRow(etf, { metric: "买一笔仅需" })}
+        </div>`;
+      }
+      if (module.layout === "t0") {
+        return `<div class="feature-card" data-module-link>
+          <div class="t0-line">${module.headline}</div>
+          <div class="product-row">
+            ${favButton(etf.code)}
+            <button class="product-main" data-product="${etf.code}">
+              <div class="t0-product" style="grid-column:1 / -1;">
+                <div class="sparkline">⌁</div>
+                <div>
+                  <div class="product-name">${etf.name}</div>
+                  <div class="product-tags"><span class="product-tag">T+0</span><span class="product-tag">腾讯控股</span><span class="product-tag">阿里巴巴-W</span></div>
+                </div>
+                <div><div class="rise">+0.43%</div><div class="product-meta">5分钟涨速</div></div>
+              </div>
+            </button>
+          </div>
+          <div class="t0-line">${module.text}</div>
+        </div>`;
+      }
+      return `<div class="feature-card" data-module-link>
+        <div class="feature-line" style="margin-top:0;"><span class="tag">${module.tag}</span>${module.headline}</div>
+        ${module.text ? `<div class="feature-note"><span class="tag">历史收益</span>${module.text}</div>` : ""}
+        <div class="feature-divider"></div>
+        ${productRow(etf, { metric: module.layout === "global" ? "买一笔仅需" : "买一笔仅需", tags: module.layout === "global" ? ["T+0"] : null })}
+      </div>`;
+    }
+    function renderFeatureModules() {
+      $("featureModules").innerHTML = featureModules.map((module) => {
+        const etf = getEtf(module.etf);
+        if (!etf) return "";
+        return `<section id="${module.id}">
+          <div class="section-head" data-module-link="${module.id}"><div class="title-wrap"><span class="section-title">${module.title}</span><span class="section-sub">${module.sub}</span></div><button class="more-link" data-action="module-page" data-module-action="${module.id}">›</button></div>
+          ${renderFeatureCard(module, etf)}
+        </section>`;
+      }).join("");
+    }
+    function goIndexSlide(index) {
+      currentIndexSlide = (index + indexSlides.length) % indexSlides.length;
+      renderFeatureModules();
+      startIndexAutoPlay();
+    }
+    function startIndexAutoPlay() {
+      if (indexTimer) clearInterval(indexTimer);
+      indexTimer = setInterval(() => {
+        currentIndexSlide = (currentIndexSlide + 1) % indexSlides.length;
+        renderFeatureModules();
+      }, 3800);
+    }
+    function renderHotChips() { $("hotChips").innerHTML = hotSpots.map((item) => `<button class="chip ${item.id === currentHot ? "active" : ""}" data-hot="${item.id}">${item.label}</button>`).join(""); }
+    function renderHotCard() {
+      const hot = hotSpots.find((item) => item.id === currentHot);
+      const related = hot.etfs.map(getEtf).filter(Boolean);
+      $("hotCard").innerHTML = `<span class="tag">热点</span><span class="tag blue">${hot.label}</span><div class="hot-title">${hot.title}</div><div class="why"><div class="why-row"><div class="why-label">看点</div><div>${hot.why}</div></div><div class="why-row"><div class="why-label">提醒</div><div>${hot.risk}</div></div></div><div class="related-list">${related.map((etf) => `<div class="mini-etf">${favButton(etf.code)}<div><div class="name">${etf.name}</div><div class="code">${etf.code} · ${etf.index}</div></div>${formatChange(etf.change)}</div>`).join("")}</div><div class="card-actions"><button class="secondary" data-action="compare-hot">同类对比</button><button class="ghost" data-scroll="buy-index">查看更多</button></div>`;
+    }
+    function renderCategoryChips() { $("categoryChips").innerHTML = categories.map((item) => `<button class="chip ${item === currentCategory ? "active" : ""}" data-category="${item}">${item}</button>`).join(""); }
+    function renderSorts() { $("sorts").innerHTML = sorts.map((item) => `<button class="sort ${item.key === currentSort ? "active" : ""}" data-sort="${item.key}">${item.label}</button>`).join(""); }
+    function sortWatchItems(list) {
+      return [...list].sort((a, b) => b.change - a.change).slice(0, 9);
+    }
+    function renderWatch() {
+      $("watchTabs").innerHTML = watchTabs.map((item) => `<button class="watch-tab ${item === currentWatchTab ? "active" : ""}" data-watch-tab="${item}">${item}</button>`).join("");
+      document.querySelectorAll(".view-option").forEach((item) => item.classList.toggle("active", item.dataset.view === currentWatchView));
+      const filtered = currentWatchTab === "全部" ? heatmapItems : heatmapItems.filter((item) => item.tab === currentWatchTab);
+      const items = sortWatchItems(filtered);
+      if (currentWatchView === "list") {
+        $("watchContent").innerHTML = `<div class="watch-list-panel">${items.slice(0, 5).map((item, index) => `<div class="list-row" data-watch-product="${item.code}">
+          <div class="list-rank ${index < 3 ? "top" : ""}">${index + 1}</div>
+          ${favButton(item.code)}
+          <div>
+            <div class="list-name">${item.name}</div>
+            <div class="list-meta">${item.hold || item.tab + ' ETF'}</div>
+          </div>
+          <div class="list-right">
+            <div class="list-change">${item.change >= 0 ? "+" : ""}${item.change.toFixed(2)}%</div>
+            <div class="list-volume">成交额${item.volume}</div>
+          </div>
+        </div>`).join("")}</div>`;
+        return;
+      }
+      $("watchContent").innerHTML = `<div class="heatmap">${items.slice(0, 9).map((item, index) => {
+        const isLarge = index < 2;
+        const value = `${item.change >= 0 ? "+" : ""}${item.change.toFixed(2)}%`;
+        const signClass = item.change < 0 ? "down" : "";
+        const bottomInfo = item.hold ? `<div class="heat-hold">${item.hold}</div>` : (!isLarge ? `<div class="heat-volume">成交额${item.volume}</div>` : "");
+        return `<button class="heat-tile ${isLarge ? "large" : ""} ${signClass}" data-action="etf-detail">
+          <div class="heat-name">${item.name}</div>
+          <div>
+            <div class="heat-main">
+              <div class="heat-change">${value}</div>
+              ${isLarge ? '<div class="heat-volume">成交额' + item.volume + '</div>' : ''}
+            </div>
+            ${bottomInfo}
+          </div>
+        </button>`;
+      }).join("")}</div>`;
+    }
+    function getRankItems() {
+      const filtered = currentRankTab === "全部" ? heatmapItems : heatmapItems.filter((item) => item.tab === currentRankTab);
+      return [...filtered].sort((a, b) => {
+        if (currentRankSort === "成交额") return parseNumber(b.volume) - parseNumber(a.volume);
+        if (currentRankSort === "主力净流入") return b.flow - a.flow;
+        if (currentRankSort === "基金规模") return b.scaleNum - a.scaleNum;
+        return b.change - a.change;
+      });
+    }
+    function renderRankTabs() {
+      $("rankTabs").innerHTML = watchTabs.map((item) => `<button class="rank-tab ${item === currentRankTab ? "active" : ""}" data-rank-tab="${item}">${item}</button>`).join("");
+    }
+    function renderRankSorts() {
+      $("rankSorts").innerHTML = rankSorts.map((item) => `<button class="rank-sort ${item === currentRankSort ? "active" : ""}" data-rank-sort="${item}">${item}</button>`).join("");
+    }
+    function renderRankList() {
+      const items = getRankItems();
+      $("rankList").innerHTML = items.map((item, index) => {
+        const changeClass = item.change >= 0 ? "rank-change" : "rank-change down";
+        const sign = item.change >= 0 ? "+" : "";
+        return `<div class="rank-item" data-watch-product="${item.code}">
+          <div class="rank-no ${index < 3 ? "top" : ""}">${index + 1}</div>
+          ${favButton(item.code)}
+          <div>
+            <div class="rank-name">${item.name}</div>
+            <div class="rank-code">${item.code} · ${item.tab} ETF</div>
+          </div>
+          <div class="rank-right">
+            <div class="${changeClass}">${sign}${item.change.toFixed(2)}%</div>
+            <div class="rank-extra">成交额${item.volume}</div>
+          </div>
+        </div>`;
+      }).join("");
+    }
+    function renderRankPage() { renderRankTabs(); renderRankSorts(); renderRankList(); }
+    function openRankPage() {
+      currentRankTab = currentWatchTab;
+      currentRankSort = "涨幅";
+      renderRankPage();
+      $("rankPage").classList.add("show");
+    }
+    function sortEtfs(list) {
+      return [...list].sort((a, b) => {
+        if (currentSort === "volume") return parseNumber(b.volume) - parseNumber(a.volume);
+        if (currentSort === "fee") return parseNumber(a.fee) - parseNumber(b.fee);
+        if (currentSort === "premium") return Math.abs(parseNumber(a.premium)) - Math.abs(parseNumber(b.premium));
+        return b.change - a.change;
+      });
+    }
+    function renderEtfList() {
+      const filtered = currentCategory === "全部" ? etfs : etfs.filter((item) => item.category === currentCategory);
+      $("etfList").innerHTML = sortEtfs(filtered).map((etf) => `<article class="etf-card"><div class="etf-top"><div><div class="name-row">${favButton(etf.code)}<div class="name">${etf.name}</div></div><div class="code">${etf.code} · ${etf.index}</div><div class="etf-desc">${etf.desc}</div></div><div>${formatChange(etf.change)}<div class="code" style="text-align:right;">${etf.price} 元</div></div></div><div class="metric-grid"><div class="metric"><div class="metric-label">规模</div><div class="metric-value">${etf.scale}</div></div><div class="metric"><div class="metric-label">成交额</div><div class="metric-value">${etf.volume}</div></div><div class="metric"><div class="metric-label">费率</div><div class="metric-value">${etf.fee}</div></div><div class="metric"><div class="metric-label">溢价</div><div class="metric-value">${etf.premium}</div></div></div><div class="card-actions two-actions"><button class="ghost" data-toggle-compare="${etf.code}">${compare.has(etf.code) ? "移出对比" : "加入对比"}</button><button class="secondary" data-action="etf-detail">查看详情</button></div></article>`).join("");
+      renderCompareStick();
+    }
+    function renderCompareStick() { const stick = $("compareStick"); $("compareCount").textContent = `已选 ${compare.size} 只 ETF`; stick.classList.toggle("show", compare.size > 0); }
+    function openCompare() {
+      const selected = [...compare].map(getEtf).filter(Boolean);
+      $("compareContent").innerHTML = selected.length ? `<table class="compare-table"><tbody><tr><th>产品</th>${selected.map((e) => `<td><b>${e.name}</b><br><span class="code">${e.code}</span></td>`).join("")}</tr><tr><th>指数</th>${selected.map((e) => `<td>${e.index}</td>`).join("")}</tr><tr><th>涨幅</th>${selected.map((e) => `<td>${e.change >= 0 ? "+" : ""}${e.change.toFixed(2)}%</td>`).join("")}</tr><tr><th>规模</th>${selected.map((e) => `<td>${e.scale}</td>`).join("")}</tr><tr><th>成交额</th>${selected.map((e) => `<td>${e.volume}</td>`).join("")}</tr><tr><th>费率</th>${selected.map((e) => `<td>${e.fee}</td>`).join("")}</tr><tr><th>溢价率</th>${selected.map((e) => `<td>${e.premium}</td>`).join("")}</tr><tr><th>T+0</th>${selected.map((e) => `<td>${e.t0}</td>`).join("")}</tr></tbody></table><div class="alert-box" style="margin-top:12px;">同主题 ETF 不只看涨幅，也要看规模、成交额、费率和溢价率。短线交易更关注流动性和折溢价，长期配置更关注指数质量和跟踪稳定性。</div>` : `<div class="alert-box">请先加入 2-3 只 ETF，再查看对比。</div>`;
+      $("compareSheet").classList.add("show");
+    }
+    function answerFor(question) {
+      if (question.includes("汽车")) return "汽车 ETF 走强通常来自整车销量、智能化合作、零部件订单或政策预期。选择同类 ETF 时，可比较跟踪指数、前十大成分股集中度、成交额和溢价率；如果短期涨幅过快，要留意追高风险。";
+      if (question.includes("同类")) return "同类 ETF 建议先确认跟踪指数是否一致，再看规模、成交额、费率、跟踪误差和溢价率。短线偏交易效率，优先看成交额和溢价；长期偏配置，优先看指数代表性、费率和跟踪稳定性。";
+      if (question.includes("T+0")) return "T+0 ETF 交易更灵活，但不等于低风险。跨境和商品 ETF 还要关注汇率、海外市场波动、溢价率和交易时段错位，频繁交易也会放大成本和情绪影响。";
+      if (question.includes("持仓")) return "当前示例持仓偏科技成长和港股互联网，短期弹性较高但波动也较大。若目标是长期持有，可考虑补充宽基、红利、黄金或债券类 ETF，降低单一风格暴露。";
+      if (question.includes("新发") || question.includes("风险")) return "新发 ETF 需要重点看跟踪指数、基金公司管理能力、费率、建仓期安排和上市后的流动性。新发不等于更便宜，是否适合要回到指数价值和个人风险承受能力。";
+      return "我会从三个问题拆解：这只 ETF 跟踪什么、为什么现在受关注、风险在哪里。接着再看规模、成交额、费率、溢价率和同类产品差异，避免只看当天涨幅做决策。";
+    }
+    function openAssistant(question = "ETF 专区怎么帮我选产品？") { $("chat").innerHTML = `<div class="bubble user">${question}</div><div class="bubble bot">${answerFor(question)}</div>`; $("assistantSheet").classList.add("show"); }
+    function openDemoSheet(title, message) {
+      $("demoTitle").textContent = title;
+      $("demoMessage").textContent = message;
+      $("demoSheet").classList.add("show");
+    }
+    function toggleFavorite(code) {
+      if (favorites.has(code)) favorites.delete(code);
+      else favorites.add(code);
+      renderHeroBoard();
+      renderFeatureModules();
+      renderWatch();
+      if ($("rankPage").classList.contains("show")) renderRankPage();
+    }
+    function scrollToSection(id) { const target = $(id); if (!target) return; target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    function init() {
+      renderHeroBoard(); renderFeatureModules(); renderWatch();
+      startIndexAutoPlay();
+      document.addEventListener("click", (event) => {
+        const target = event.target.closest("button"); if (!target) return;
+        if (target.dataset.indexSlide) { goIndexSlide(Number(target.dataset.indexSlide)); return; }
+        if (target.dataset.featureHot) { currentDigHot = target.dataset.featureHot; renderFeatureModules(); return; }
+        if (target.dataset.fav) { toggleFavorite(target.dataset.fav); return; }
+        if (target.dataset.product) { openDemoSheet("ETF 产品页", "跳转原 ETF 产品页面，本模块新增首页 ETF 加自选交互，其余模块内容无优化，点击 ETF 产品跳转原 ETF 产品页面。"); return; }
+        if (target.dataset.hot) { currentHot = target.dataset.hot; renderHotChips(); renderHotCard(); return; }
+        if (target.dataset.view) { currentWatchView = target.dataset.view; renderWatch(); return; }
+        if (target.dataset.watchTab) { currentWatchTab = target.dataset.watchTab; renderWatch(); return; }
+        if (target.dataset.rankTab) { currentRankTab = target.dataset.rankTab; renderRankPage(); return; }
+        if (target.dataset.rankSort) { currentRankSort = target.dataset.rankSort; renderRankPage(); return; }
+        if (target.dataset.scroll) { scrollToSection(target.dataset.scroll); return; }
+        if (target.dataset.close) { $(target.dataset.close).classList.remove("show"); return; }
+        if (target.dataset.prompt) { openAssistant(target.dataset.prompt); return; }
+        const action = target.dataset.action;
+        if (action === "compare") openCompare();
+        if (action === "etf-detail") openDemoSheet("ETF 产品页", "跳转ETF产品页");
+        if (action === "buy-index-entry") openDemoSheet("买指数", "跳转买指数二级页面");
+        if (action === "portfolio-detail") openDemoSheet("持仓诊断", "跳转持仓诊断页。");
+        if (action === "compare-hot") { const hot = hotSpots.find((item) => item.id === currentHot); hot.etfs.forEach((code) => compare.add(code)); openCompare(); }
+        if (action === "clear-compare") { compare.clear(); }
+        if (action === "open-rank") openRankPage();
+        if (action === "close-rank") $("rankPage").classList.remove("show");
+        if (action === "guide-page") openDemoSheet("快速了解 ETF", "此处跳转快速了解 ETF 投教页面。");
+        if (action === "original-page") openDemoSheet("原二级页面", "本次demo无优化，跳转原二级页面。");
+        if (action === "module-page") {
+          if (target.dataset.moduleAction === "buy-index") openDemoSheet("买指数", "跳转原二级页面，本模块新增首页ETF产品点红心加自选交互；左右滑动切换推荐产品交互。");
+          else openDemoSheet("原二级页面", "跳转原二级页面，本模块新增首页ETF加自选交互，其余模块内容无优化，点击模块内容跳转原二级页面。");
+        }
+      });
+      document.addEventListener("touchstart", (event) => {
+        const carousel = event.target.closest("[data-index-carousel]");
+        if (!carousel || !event.touches.length) return;
+        indexTouch = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+      }, { passive: true });
+      document.addEventListener("touchend", (event) => {
+        if (!indexTouch) return;
+        const carousel = event.target.closest("[data-index-carousel]");
+        if (!carousel || !event.changedTouches.length) { indexTouch = null; return; }
+        const dx = event.changedTouches[0].clientX - indexTouch.x;
+        const dy = event.changedTouches[0].clientY - indexTouch.y;
+        indexTouch = null;
+        if (Math.abs(dx) < 36 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        goIndexSlide(currentIndexSlide + (dx < 0 ? 1 : -1));
+      }, { passive: true });
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("button")) return;
+        if (event.target.closest("[data-watch-product]")) {
+          openDemoSheet("ETF 产品页", "跳转ETF产品页");
+          return;
+        }
+        if (event.target.closest("[data-watch-link]")) {
+          openRankPage();
+          return;
+        }
+        const heroLink = event.target.closest("[data-hero-link]");
+        if (heroLink) {
+          if (heroLink.dataset.heroLink === "dig-hot") openDemoSheet("挖热点", "跳转挖热点二级页面");
+          if (heroLink.dataset.heroLink === "t0") openDemoSheet("T+0交易", "跳转T+0交易二级页面");
+          return;
+        }
+        const moduleLink = event.target.closest("[data-module-link]");
+        if (moduleLink) {
+          if (moduleLink.dataset.moduleLink === "buy-index") openDemoSheet("买指数", "跳转原二级页面，本模块新增首页ETF产品点红心加自选交互；左右滑动切换推荐产品交互。");
+          else openDemoSheet("原二级页面", "跳转原二级页面，本模块新增首页ETF加自选交互，其余模块内容无优化，点击模块内容跳转原二级页面。");
+        }
+      });
+      $("headerAsk").addEventListener("click", () => openAssistant());
+      $("searchAsk").addEventListener("click", () => openAssistant("同类 ETF 应该怎么选？"));
+    }
+    init();
+  </script>
+</body>
+</html>
