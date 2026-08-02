@@ -43,13 +43,6 @@
       position: relative;
     }
     .screen { height: 100%; overflow-y: auto; padding-bottom: 86px; scroll-behavior: smooth; }
-    .status {
-      height: 36px; padding: 10px 24px 0; display: flex; align-items: center; justify-content: space-between;
-      color: #0f1726; font-size: 14px; font-weight: 700; background: var(--panel);
-    }
-    .status-icons { display: flex; gap: 5px; align-items: center; }
-    .bar { width: 18px; height: 10px; border: 2px solid #0f1726; border-radius: 2px; position: relative; }
-    .bar::after { content: ""; position: absolute; right: -4px; top: 2px; width: 2px; height: 4px; background: #0f1726; border-radius: 1px; }
     .header { background: var(--panel); padding: 10px 18px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
     .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .brand-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -82,21 +75,23 @@
     .quick-icon svg { width: 40px; height: 40px; display: block; }
     .quick-label { white-space: nowrap; }
     .guide-row {
-      display: flex; align-items: stretch; gap: 8px; margin: 0 0 12px; max-width: 100%;
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; margin: 0 0 12px;
+      max-width: 100%; min-height: 42px; border: 1px solid #e8ecf4; border-radius: 8px; overflow: hidden;
+      background: #f6f8fc;
     }
     .guide-link {
-      min-width: 0; flex: 1; height: 36px; border-radius: 6px; background: #f6f8fc; color: #2d3748;
+      min-width: 0; height: 42px; color: #2d3748;
       display: inline-flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px;
-      font-size: 14px; border: 1px solid #e8ecf4;
+      font-size: 14px; text-align: left;
     }
     .guide-link strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .guide-link span { color: #8590a1; }
     .guide-benefits {
-      flex: none; width: 118px; min-height: 36px; border: 1px solid #e8ecf4; border-radius: 6px; background: #fff;
-      display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; overflow: hidden;
+      width: 126px; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center;
+      border-left: 1px solid #e8ecf4; background: rgba(255, 255, 255, .48);
     }
     .guide-benefit {
-      height: 100%; padding: 4px 2px; display: grid; place-items: center; color: #667085; font-size: 11px;
+      height: 100%; padding: 5px 2px; display: grid; place-items: center; color: #667085; font-size: 11px;
       font-weight: 760; line-height: 1.08; text-align: center; border-left: 1px solid #eef1f6;
     }
     .guide-benefit:first-child { border-left: 0; }
@@ -122,12 +117,13 @@
       box-shadow: 0 4px 14px rgba(17, 24, 39, .04); text-align: left; width: 100%;
     }
     .hero-mini-card[data-hero-link] { cursor: pointer; }
-    .hero-mini-head { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 5px; min-width: 0; margin-bottom: 9px; }
+    .hero-mini-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 5px; min-width: 0; margin-bottom: 9px; }
     .hero-mini-title { color: #111827; font-size: 18px; font-weight: 950; line-height: 1.08; white-space: nowrap; }
     .hero-mini-sub {
       color: #d94747; font-size: 11px; font-weight: 800; background: #fff1f1; border-radius: 3px; padding: 2px 4px;
       white-space: nowrap; justify-self: start;
     }
+    .hero-mini-arrow { color: #9aa4b3; font-size: 20px; font-weight: 900; line-height: 1; justify-self: end; }
     .hot-topic-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; margin-bottom: 10px; }
     .hot-topic-name { color: #253044; font-size: 15px; font-weight: 900; line-height: 1.15; }
     .hot-topic-change { color: var(--red); font-size: 17px; font-weight: 900; white-space: nowrap; }
@@ -386,7 +382,9 @@
     .portfolio-score { display: grid; grid-template-columns: 86px 1fr; gap: 12px; align-items: center; }
     .score-ring { width: 78px; height: 78px; border-radius: 50%; background: conic-gradient(var(--red) 0 72%, #f3dfe2 72% 100%); display: grid; place-items: center; position: relative; }
     .score-ring::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: #fff; }
-    .score-ring span { position: relative; font-weight: 950; color: var(--red); font-size: 20px; }
+    .score-ring-content { position: relative; display: grid; place-items: center; gap: 1px; }
+    .score-ring-label { color: #8a94a4; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .score-ring-value { color: var(--red); font-size: 19px; font-weight: 950; line-height: 1; }
     .portfolio-title { font-weight: 900; font-size: 17px; margin-bottom: 5px; }
     .portfolio-text { color: #5d6878; font-size: 13px; line-height: 1.45; }
     .alert-box { background: #fff7e8; border: 1px solid #f1d7aa; border-radius: 8px; padding: 10px; color: #6d4c19; font-size: 13px; line-height: 1.45; }
@@ -432,7 +430,6 @@
   <main class="stage">
     <div class="phone" aria-label="腾讯自选股 ETF 专区改版原型">
       <div class="screen" id="screen">
-        <div class="status"><span>12:06</span><span class="status-icons"><span>5G</span><span class="bar"></span></span></div>
         <header class="header">
           <div class="brand">
             <div class="brand-left"><div class="logo">↗</div><div class="brand-title">腾讯自选股</div></div>
@@ -530,13 +527,13 @@
         </section>
         <div id="featureModules"></div>
         <section id="portfolio">
-          <div class="section-head"><div class="title-wrap"><span class="section-title">我的 ETF</span><span class="section-sub">诊断持仓情况</span></div><button class="more-link" data-scroll="buy-index">›</button></div>
+          <div class="section-head"><div class="title-wrap"><span class="section-title">我的 ETF</span><span class="section-sub">诊断持仓情况</span></div></div>
           <div class="portfolio-card">
             <div class="portfolio-score">
-              <div class="score-ring"><span>+5%</span></div>
+              <div class="score-ring"><div class="score-ring-content"><div class="score-ring-label">今日收益</div><div class="score-ring-value">+5%</div></div></div>
               <div><div class="portfolio-title">组合集中在科技与港股互联网</div><div class="portfolio-text">近 7 日收益主要来自港股互联网 ETF；汽车主题与消费主题相关性偏高。</div></div>
             </div>
-            <div class="alert-box">当前持仓中 3 只 ETF 偏成长风格，波动可能较大。可加入宽基、红利 ETF 优化资产配置。</div>
+            <div class="alert-box">持仓优化建议：当前持仓中 3 只 ETF 偏成长风格，波动可能较大。可加入宽基、红利 ETF 优化资产配置。</div>
             <div class="card-actions"><button class="secondary" data-scroll="buy-index">优化配置</button></div>
           </div>
         </section>
@@ -611,11 +608,13 @@
       { code: "510300", name: "沪深300ETF华泰柏瑞", category: "宽基指数", index: "沪深300", change: -0.36, price: "3.86", scale: "1700亿", volume: "42亿", fee: "0.15%", premium: "0.01%", t0: "否", desc: "A 股大盘核心宽基，适合做基础仓位。" },
       { code: "513100", name: "纳指ETF国泰", category: "跨境投资", index: "纳斯达克100", change: 1.32, price: "1.48", scale: "236亿", volume: "11亿", fee: "0.60%", premium: "0.72%", t0: "是", desc: "美股科技龙头暴露，需关注溢价和汇率。" },
       { code: "513350", name: "标普油气ETF富国", category: "跨境投资", index: "标普油气精选", change: 1.74, price: "123.10", scale: "21亿", volume: "1.9亿", fee: "0.60%", premium: "0.45%", t0: "是", desc: "能源板块海外暴露，波动较高。" },
+      { code: "513520", name: "日经ETF华夏", category: "跨境投资", index: "日经225", change: 4.43, price: "216.70", scale: "45亿", volume: "3.6亿", fee: "0.60%", premium: "0.38%", t0: "是", desc: "覆盖日本核心资产，支持 T+0 交易。" },
       { code: "518880", name: "黄金ETF华安", category: "商品债券", index: "黄金现货合约", change: 0.42, price: "5.48", scale: "286亿", volume: "9.2亿", fee: "0.50%", premium: "0.02%", t0: "是", desc: "黄金资产工具，可用于风险分散。" },
       { code: "511260", name: "十年国债ETF", category: "商品债券", index: "10年国债", change: 0.08, price: "113.44", scale: "58亿", volume: "0.7亿", fee: "0.20%", premium: "0.00%", t0: "是", desc: "利率债工具，偏稳健配置。" },
       { code: "562060", name: "标普A股红利ETF", category: "宽基指数", index: "标普A股红利", change: 10.18, price: "62.80", scale: "42亿", volume: "2.6亿", fee: "0.50%", premium: "0.08%", t0: "否", desc: "聚焦高股息资产，偏防守配置。" },
       { code: "510880", name: "红利ETF华泰柏瑞", category: "宽基指数", index: "上证红利", change: 0.86, price: "3.12", scale: "188亿", volume: "5.4亿", fee: "0.50%", premium: "0.02%", t0: "否", desc: "跟踪上证红利指数，高股息风格。" },
       { code: "515180", name: "中证红利ETF", category: "宽基指数", index: "中证红利", change: 0.72, price: "1.36", scale: "95亿", volume: "3.8亿", fee: "0.50%", premium: "0.03%", t0: "否", desc: "覆盖沪深高股息公司。" },
+      { code: "159209", name: "红利质量ETF招商", category: "宽基指数", index: "红利质量", change: 16.20, price: "1.18", scale: "29亿", volume: "1.7亿", fee: "0.50%", premium: "0.05%", t0: "否", desc: "兼顾股息率与盈利质量，偏红利增强风格。" },
       { code: "513330", name: "港股互联网ETF国泰", category: "跨境投资", index: "中证港股通互联网", change: 0.43, price: "0.91", scale: "163亿", volume: "12亿", fee: "0.60%", premium: "0.18%", t0: "是", desc: "港股互联网龙头，支持 T+0 交易。" }
       ,{ code: "159725", name: "在线消费ETF南方", category: "行业主题", index: "中证线上消费", change: 7.12, price: "0.82", scale: "42亿", volume: "2.03亿", fee: "0.50%", premium: "0.08%", t0: "否", desc: "覆盖线上消费、平台经济和消费科技。" }
       ,{ code: "159586", name: "工业软件ETF广发", category: "行业主题", index: "中证工业软件", change: 7.23, price: "1.06", scale: "31亿", volume: "4969万", fee: "0.50%", premium: "0.11%", t0: "否", desc: "聚焦工业软件、智能制造和AI应用。" }
@@ -679,10 +678,20 @@
       { name: "亚太精选ETF", change: 5.63 },
       { name: "教育ETF博时", change: 4.75 }
     ];
-    const indexSlides = [
-      { headline: "A股经典晴雨表，映射市场情绪与趋势", text: "上证指数过去20年涨1.3倍，年化4%", etf: "510210" },
-      { headline: "聚焦A股中盘成长，中小市值挖掘高弹性", text: "中证500过去20年涨4.3倍，年化约9%", etf: "159500" }
-    ];
+    const moduleSlides = {
+      "buy-index": [
+        { type: "index", headline: "A股经典晴雨表，映射市场情绪与趋势", text: "上证指数过去20年涨1.3倍，年化4%", etf: "510210" },
+        { type: "index", headline: "聚焦A股中盘成长，中小市值挖掘高弹性", text: "中证500过去20年涨4.3倍，年化约9%", etf: "159500" }
+      ],
+      "global-invest": [
+        { type: "global", tag: "热点", headline: "美原油库存减580万桶:供给收紧预期升温，能源板块迎机会", etf: "513350" },
+        { type: "global", tag: "热点", headline: "日美汽车关税下调:出口企业受益，日股上行正当时", etf: "513520" }
+      ],
+      dividend: [
+        { type: "dividend", etf: "562060", dividendYield: "4.00%+", performance: "+10.18%" },
+        { type: "dividend", etf: "159209", dividendYield: "3.63%", performance: "+16.20%" }
+      ]
+    };
     let currentHot = "auto";
     let currentDigHot = "token";
     let currentCategory = "全部";
@@ -691,9 +700,9 @@
     let currentWatchView = "heatmap";
     let currentRankTab = "全部";
     let currentRankSort = "涨幅";
-    let currentIndexSlide = 0;
+    const carouselState = { "buy-index": 0, "global-invest": 0, dividend: 0 };
     let indexTimer = null;
-    let indexTouch = null;
+    let carouselTouch = null;
     const compare = new Set(["516840", "159928"]);
     const favorites = new Set(["516840"]);
     const $ = (id) => document.getElementById(id);
@@ -716,41 +725,83 @@
         </button>
       </div>`;
     }
+    function dividendProductRow(etf, slide) {
+      return `<div class="product-row">
+        ${favButton(etf.code)}
+        <button class="product-main" data-product="${etf.code}">
+          <div>
+            <div class="product-name">${etf.name}</div>
+            <div class="product-code">${etf.code}</div>
+          </div>
+          <div>
+            <div class="product-price">${slide.dividendYield}</div>
+            <div class="product-meta">股息率</div>
+          </div>
+          <div>
+            <div class="rise">${slide.performance}</div>
+            <div class="product-meta">近1年涨幅</div>
+          </div>
+        </button>
+      </div>`;
+    }
+    function renderModuleSlide(module, slide) {
+      const slideEtf = getEtf(slide.etf);
+      if (!slideEtf) return "";
+      if (slide.type === "index") {
+        return `<div class="index-slide" data-module-link="${module.id}">
+          <div class="feature-line" style="margin-top:0;"><span class="tag">产品亮点</span>${slide.headline}</div>
+          <div class="feature-note"><span class="tag">历史收益</span>${slide.text}</div>
+          <div class="feature-divider"></div>
+          ${productRow(slideEtf, { metric: "买一笔仅需" })}
+        </div>`;
+      }
+      if (slide.type === "global") {
+        return `<div class="index-slide" data-module-link="${module.id}">
+          <div class="feature-line" style="margin-top:0;"><span class="tag">${slide.tag}</span>${slide.headline}</div>
+          <div class="feature-divider"></div>
+          ${productRow(slideEtf, { metric: "买一笔仅需", tags: ["T+0"] })}
+        </div>`;
+      }
+      return `<div class="index-slide" data-module-link="${module.id}">
+        <div class="feature-compare">
+          <div class="compare-box"><div class="compare-label">股息率</div><div>${slide.dividendYield}</div><div style="font-size:13px;color:#253044;">红利ETF</div></div>
+          <div class="compare-box safe"><div class="compare-label">1年期利率</div><div>1.00%+</div><div style="font-size:13px;">银行存款</div></div>
+        </div>
+        ${dividendProductRow(slideEtf, slide)}
+      </div>`;
+    }
+    function renderCarouselModule(module) {
+      const slides = moduleSlides[module.id] || [];
+      const currentSlide = carouselState[module.id] || 0;
+      return `<div class="feature-card index-carousel">
+        <div class="index-viewport" data-index-carousel="${module.id}">
+          <div class="index-track" style="transform: translateX(-${currentSlide * 100}%);">
+            ${slides.map((slide) => renderModuleSlide(module, slide)).join("")}
+          </div>
+        </div>
+        <div class="index-dots">
+          ${slides.map((_, index) => `<button class="index-dot ${index === currentSlide ? "active" : ""}" data-carousel-slide="${module.id}:${index}" aria-label="切换到第 ${index + 1} 张"></button>`).join("")}
+        </div>
+      </div>`;
+    }
     function renderHeroBoard() {
       const topic = digHotTopics[0];
       const topicEtf = getEtf(topic.etf);
       $("heroBoard").innerHTML = `<div class="hero-mini-card" data-hero-link="dig-hot">
-        <div class="hero-mini-head"><div class="hero-mini-title">挖热点</div><div class="hero-mini-sub">紧跟实时热点</div></div>
+        <div class="hero-mini-head"><div class="hero-mini-title">挖热点</div><div class="hero-mini-sub">紧跟实时热点</div><div class="hero-mini-arrow">›</div></div>
         <div class="hot-topic-row"><div class="hot-topic-name">${topic.label}</div><div class="hot-topic-change">+${topic.change.toFixed(2)}%</div></div>
         ${topicEtf ? `<button class="t0-rank-item" data-action="etf-detail"><div class="fire">🔥</div><div class="t0-rank-name">${topicEtf.name}</div><div class="t0-rank-change">+${topicEtf.change.toFixed(2)}%</div></button>` : ""}
       </div>
       <div class="hero-mini-card" data-hero-link="t0">
-        <div class="hero-mini-head"><div class="hero-mini-title">T+0交易</div><div class="hero-mini-sub">支持日内交易</div></div>
+        <div class="hero-mini-head"><div class="hero-mini-title">T+0交易</div><div class="hero-mini-sub">支持日内交易</div><div class="hero-mini-arrow">›</div></div>
         <div class="t0-rank-list">
           ${t0RankItems.map((item) => `<button class="t0-rank-item" data-action="etf-detail"><div class="fire">🔥</div><div class="t0-rank-name">${item.name}</div><div class="t0-rank-change">+${item.change.toFixed(2)}%</div></button>`).join("")}
         </div>
       </div>`;
     }
     function renderFeatureCard(module, etf) {
-      if (module.layout === "index") {
-        return `<div class="feature-card index-carousel">
-          <div class="index-viewport" data-index-carousel>
-            <div class="index-track" style="transform: translateX(-${currentIndexSlide * 100}%);">
-              ${indexSlides.map((slide) => {
-                const slideEtf = getEtf(slide.etf);
-                return `<div class="index-slide" data-module-link="buy-index">
-                  <div class="feature-line" style="margin-top:0;"><span class="tag">产品亮点</span>${slide.headline}</div>
-                  <div class="feature-note"><span class="tag">历史收益</span>${slide.text}</div>
-                  <div class="feature-divider"></div>
-                  ${slideEtf ? productRow(slideEtf, { metric: "买一笔仅需" }) : ""}
-                </div>`;
-              }).join("")}
-            </div>
-          </div>
-          <div class="index-dots">
-            ${indexSlides.map((_, index) => `<button class="index-dot ${index === currentIndexSlide ? "active" : ""}" data-index-slide="${index}" aria-label="切换到第 ${index + 1} 张"></button>`).join("")}
-          </div>
-        </div>`;
+      if (["index", "global", "dividend"].includes(module.layout)) {
+        return renderCarouselModule(module);
       }
       if (module.layout === "hot") {
         const topic = digHotTopics.find((item) => item.id === currentDigHot) || digHotTopics[0];
@@ -764,15 +815,6 @@
           </div>
           <div class="hot-news"><span class="tag">热点</span>${topic.headline}</div>
           ${productRow(topicEtf, { compact: true })}
-        </div>`;
-      }
-      if (module.layout === "dividend") {
-        return `<div class="feature-card" data-module-link>
-          <div class="feature-compare">
-            <div class="compare-box"><div class="compare-label">股息率</div><div>4.00%+</div><div style="font-size:13px;color:#253044;">红利ETF</div></div>
-            <div class="compare-box safe"><div class="compare-label">1年期利率</div><div>1.00%+</div><div style="font-size:13px;">银行存款</div></div>
-          </div>
-          ${productRow(etf, { metric: "买一笔仅需" })}
         </div>`;
       }
       if (module.layout === "t0") {
@@ -811,15 +853,20 @@
         </section>`;
       }).join("");
     }
-    function goIndexSlide(index) {
-      currentIndexSlide = (index + indexSlides.length) % indexSlides.length;
+    function goCarouselSlide(moduleId, index) {
+      const slides = moduleSlides[moduleId] || [];
+      if (!slides.length) return;
+      carouselState[moduleId] = (index + slides.length) % slides.length;
       renderFeatureModules();
       startIndexAutoPlay();
     }
     function startIndexAutoPlay() {
       if (indexTimer) clearInterval(indexTimer);
       indexTimer = setInterval(() => {
-        currentIndexSlide = (currentIndexSlide + 1) % indexSlides.length;
+        Object.keys(carouselState).forEach((moduleId) => {
+          const slides = moduleSlides[moduleId] || [];
+          if (slides.length > 1) carouselState[moduleId] = (carouselState[moduleId] + 1) % slides.length;
+        });
         renderFeatureModules();
       }, 3800);
     }
@@ -959,10 +1006,14 @@
       startIndexAutoPlay();
       document.addEventListener("click", (event) => {
         const target = event.target.closest("button"); if (!target) return;
-        if (target.dataset.indexSlide) { goIndexSlide(Number(target.dataset.indexSlide)); return; }
+        if (target.dataset.carouselSlide) {
+          const [moduleId, index] = target.dataset.carouselSlide.split(":");
+          goCarouselSlide(moduleId, Number(index));
+          return;
+        }
         if (target.dataset.featureHot) { currentDigHot = target.dataset.featureHot; renderFeatureModules(); return; }
         if (target.dataset.fav) { toggleFavorite(target.dataset.fav); return; }
-        if (target.dataset.product) { openDemoSheet("ETF 产品页", "跳转原 ETF 产品页面，本模块新增首页 ETF 加自选交互，其余模块内容无优化，点击 ETF 产品跳转原 ETF 产品页面。"); return; }
+        if (target.dataset.product) { openDemoSheet("ETF 产品页", "跳转ETF产品页"); return; }
         if (target.dataset.hot) { currentHot = target.dataset.hot; renderHotChips(); renderHotCard(); return; }
         if (target.dataset.view) { currentWatchView = target.dataset.view; renderWatch(); return; }
         if (target.dataset.watchTab) { currentWatchTab = target.dataset.watchTab; renderWatch(); return; }
@@ -983,24 +1034,25 @@
         if (action === "guide-page") openDemoSheet("快速了解 ETF", "此处跳转快速了解 ETF 投教页面。");
         if (action === "original-page") openDemoSheet("原二级页面", "本次demo无优化，跳转原二级页面。");
         if (action === "module-page") {
-          if (target.dataset.moduleAction === "buy-index") openDemoSheet("买指数", "跳转原二级页面，本模块新增首页ETF产品点红心加自选交互；左右滑动切换推荐产品交互。");
+          if (carouselState[target.dataset.moduleAction] !== undefined) openDemoSheet(target.closest("section")?.querySelector(".section-title")?.textContent || "原二级页面", "跳转原二级页面");
           else openDemoSheet("原二级页面", "跳转原二级页面，本模块新增首页ETF加自选交互，其余模块内容无优化，点击模块内容跳转原二级页面。");
         }
       });
       document.addEventListener("touchstart", (event) => {
         const carousel = event.target.closest("[data-index-carousel]");
         if (!carousel || !event.touches.length) return;
-        indexTouch = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        carouselTouch = { moduleId: carousel.dataset.indexCarousel, x: event.touches[0].clientX, y: event.touches[0].clientY };
       }, { passive: true });
       document.addEventListener("touchend", (event) => {
-        if (!indexTouch) return;
+        if (!carouselTouch) return;
         const carousel = event.target.closest("[data-index-carousel]");
-        if (!carousel || !event.changedTouches.length) { indexTouch = null; return; }
-        const dx = event.changedTouches[0].clientX - indexTouch.x;
-        const dy = event.changedTouches[0].clientY - indexTouch.y;
-        indexTouch = null;
+        if (!carousel || !event.changedTouches.length) { carouselTouch = null; return; }
+        const dx = event.changedTouches[0].clientX - carouselTouch.x;
+        const dy = event.changedTouches[0].clientY - carouselTouch.y;
+        const moduleId = carouselTouch.moduleId;
+        carouselTouch = null;
         if (Math.abs(dx) < 36 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-        goIndexSlide(currentIndexSlide + (dx < 0 ? 1 : -1));
+        goCarouselSlide(moduleId, (carouselState[moduleId] || 0) + (dx < 0 ? 1 : -1));
       }, { passive: true });
       document.addEventListener("click", (event) => {
         if (event.target.closest("button")) return;
@@ -1020,7 +1072,7 @@
         }
         const moduleLink = event.target.closest("[data-module-link]");
         if (moduleLink) {
-          if (moduleLink.dataset.moduleLink === "buy-index") openDemoSheet("买指数", "跳转原二级页面，本模块新增首页ETF产品点红心加自选交互；左右滑动切换推荐产品交互。");
+          if (carouselState[moduleLink.dataset.moduleLink] !== undefined) openDemoSheet(moduleLink.closest("section")?.querySelector(".section-title")?.textContent || "原二级页面", "跳转原二级页面");
           else openDemoSheet("原二级页面", "跳转原二级页面，本模块新增首页ETF加自选交互，其余模块内容无优化，点击模块内容跳转原二级页面。");
         }
       });
