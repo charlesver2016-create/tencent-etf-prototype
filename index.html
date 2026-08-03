@@ -491,9 +491,9 @@
               <span>›</span>
             </button>
             <div class="guide-benefits" aria-label="ETF 特点">
-              <div class="guide-benefit">组合<br>持仓</div>
-              <div class="guide-benefit">部分<br>T+0</div>
-              <div class="guide-benefit">免<br>印花税</div>
+              <button class="guide-benefit" data-action="guide-page">组合<br>持仓</button>
+              <button class="guide-benefit" data-action="guide-page">部分<br>T+0</button>
+              <button class="guide-benefit" data-action="guide-page">免<br>印花税</button>
             </div>
           </div>
           <button class="issue-row" data-action="original-page">
@@ -538,8 +538,8 @@
           </div>
         </section>
         <section id="learn">
-          <div class="section-head"><div class="title-wrap"><span class="section-title">ETF 轻松学</span><span class="section-sub">从概念到交易规则</span></div><button class="more-link">›</button></div>
-          <div class="learn-card"><div><div class="name">哪些 ETF 可以实现 T+0 交易？</div><div class="etf-desc">覆盖跨境、商品、债券等常见类型，结合案例说明交易风险。</div></div><div class="thumb">ETF 学习</div></div>
+          <div class="section-head" data-action="learn-page"><div class="title-wrap"><span class="section-title">ETF 轻松学</span><span class="section-sub">从概念到交易规则</span></div><button class="more-link" data-action="learn-page">›</button></div>
+          <button class="learn-card" data-action="learn-page"><div><div class="name">哪些 ETF 可以实现 T+0 交易？</div><div class="etf-desc">覆盖跨境、商品、债券等常见类型，结合案例说明交易风险。</div></div><div class="thumb">ETF 学习</div></button>
         </section>
         <p class="risk-note">示例数据仅用于交互原型演示，不构成投资建议和收益保证。基金有风险，投资需谨慎。</p>
       </div>
@@ -1032,6 +1032,7 @@
         if (action === "open-rank") openRankPage();
         if (action === "close-rank") $("rankPage").classList.remove("show");
         if (action === "guide-page") openDemoSheet("快速了解 ETF", "此处跳转快速了解 ETF 投教页面。");
+        if (action === "learn-page") openDemoSheet("原二级页面", "跳转原二级页面");
         if (action === "original-page") openDemoSheet("原二级页面", "本次demo无优化，跳转原二级页面。");
         if (action === "module-page") {
           if (carouselState[target.dataset.moduleAction] !== undefined) openDemoSheet(target.closest("section")?.querySelector(".section-title")?.textContent || "原二级页面", "跳转原二级页面");
